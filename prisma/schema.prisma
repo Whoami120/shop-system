@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+// ---------- SHOP (each business is one tenant) ----------
+model Shop {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  users     User[]
+  products  Product[]
+  stockMoves StockMove[]
+}
+
+// ---------- USERS (with roles) ----------
+enum Role {
+  ADMIN
+  CASHIER
+  STOCK
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CASHIER)
+  createdAt DateTime @default(now())
+
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  shopId    String
+
+  stockMoves StockMove[]
+}
+
+// ---------- PRODUCTS ----------
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  price     Float    @default(0)
+  quantity  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  shopId    String
+
+  stockMoves StockMove[]
+}
+
+// ---------- STOCK MOVES (every change in stock) ----------
+enum MoveType {
+  RECEPTION
+  SALE
+  BROKEN
+}
+
+model StockMove {
+  id        String   @id @default(cuid())
+  type      MoveType
+  quantity  Int
+  reason    String?
+  createdAt DateTime @default(now())
+
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  shopId    String
+
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+}
