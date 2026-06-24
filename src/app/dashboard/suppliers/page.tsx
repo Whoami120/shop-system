@@ -1,4 +1,4 @@
-import { requireRole } from "@/lib/requireAdmin";
+import { requireModule } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
 import { addSupplier, deleteSupplier } from "./actions";
 import Button from "@/components/Button";
@@ -8,7 +8,7 @@ export default async function SuppliersPage({
 }: {
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  const user = await requireRole(["ADMIN", "STOCK"]);
+  const user = await requireModule("purchases", ["ADMIN", "STOCK"]);
   const { error, ok } = await searchParams;
 
   const suppliers = await prisma.supplier.findMany({

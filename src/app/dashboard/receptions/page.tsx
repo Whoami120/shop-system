@@ -1,9 +1,9 @@
-import { requireRole } from "@/lib/requireAdmin";
+import { requireModule } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
 export default async function ReceptionsPage() {
-  const user = await requireRole(["ADMIN", "STOCK"]);
+  const user = await requireModule("purchases", ["ADMIN", "STOCK"]);
 
   const receptions = await prisma.reception.findMany({
     where: { shopId: user.shopId },

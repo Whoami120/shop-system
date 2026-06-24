@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/requireAdmin";
+import { requireModule } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
 
 function typeLabel(type: string) {
@@ -16,7 +16,7 @@ function typeColor(type: string) {
 }
 
 export default async function HistoryPage() {
-  const user = await requireAdmin();
+  const user = await requireModule("inventory", ["ADMIN"]);
 
   const moves = await prisma.stockMove.findMany({
     where: { shopId: user.shopId },

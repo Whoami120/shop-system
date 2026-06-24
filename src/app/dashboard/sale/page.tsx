@@ -1,10 +1,10 @@
-import { requireRole } from "@/lib/requireAdmin";
+import { requireModule } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
 import { recordSale } from "./actions";
 import Button from "@/components/Button";
 
 export default async function SalePage() {
-  const user = await requireRole(["ADMIN", "CASHIER"]);
+  const user = await requireModule("sales", ["ADMIN", "CASHIER"]);
 
   const products = await prisma.product.findMany({
     where: { shopId: user.shopId },

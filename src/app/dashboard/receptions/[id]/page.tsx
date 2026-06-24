@@ -1,4 +1,4 @@
-import { requireRole } from "@/lib/requireAdmin";
+import { requireModule } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -8,7 +8,7 @@ export default async function ReceptionDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await requireRole(["ADMIN", "STOCK"]);
+  const user = await requireModule("purchases", ["ADMIN", "STOCK"]);
   const { id } = await params;
 
   const reception = await prisma.reception.findFirst({

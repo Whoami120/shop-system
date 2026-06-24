@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/requireAdmin";
+import { requireModule } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
 import { createUser } from "./actions";
 import Button from "@/components/Button";
@@ -15,7 +15,7 @@ export default async function UsersPage({
 }: {
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  const admin = await requireAdmin();
+  const admin = await requireModule("settings", ["ADMIN"]);
   const { error, ok } = await searchParams;
 
   const users = await prisma.user.findMany({
