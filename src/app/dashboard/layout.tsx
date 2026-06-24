@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
 
 const links = [
   { href: "/dashboard", label: "Tableau de bord" },
@@ -51,8 +50,17 @@ export default function DashboardLayout({
         </nav>
 
         <div style={{ marginTop: "20px" }}>
-          <UserButton />
-        </div>
+  <a
+    href="/logout"
+    style={{
+      color: "#bbb",
+      textDecoration: "none",
+      fontSize: "14px",
+    }}
+  >
+    Déconnexion
+  </a>
+</div>
       </aside>
 
       {/* Page content */}

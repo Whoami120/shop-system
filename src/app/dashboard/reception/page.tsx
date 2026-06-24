@@ -6,7 +6,7 @@ import { receiveStock } from "./actions";
 export default async function ReceptionPage() {
   const user = await syncUser();
   if (!user) {
-    redirect("/sign-in");
+    redirect("/login");
   }
 
   // Get this shop's products to choose from

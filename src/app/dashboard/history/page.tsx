@@ -13,7 +13,7 @@ function typeLabel(type: string) {
 export default async function HistoryPage() {
   const user = await syncUser();
   if (!user) {
-    redirect("/sign-in");
+    redirect("/login");
   }
 
   // Get all moves for this shop, newest first.

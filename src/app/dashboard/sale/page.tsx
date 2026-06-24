@@ -6,7 +6,7 @@ import { recordSale } from "./actions";
 export default async function SalePage() {
   const user = await syncUser();
   if (!user) {
-    redirect("/sign-in");
+    redirect("/login");
   }
 
   const products = await prisma.product.findMany({

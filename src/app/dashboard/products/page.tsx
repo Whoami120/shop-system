@@ -9,7 +9,7 @@ export default async function ProductsPage() {
   // Make sure the user is logged in and in our database
   const user = await syncUser();
   if (!user) {
-    redirect("/sign-in");
+    redirect("/login");
   }
 
   // Get all products that belong to THIS user's shop

@@ -10,7 +10,7 @@ export default async function EditProductPage({
 }) {
   const user = await syncUser();
   if (!user) {
-    redirect("/sign-in");
+    redirect("/login");
   }
 
   const { id } = await params;

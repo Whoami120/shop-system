@@ -6,7 +6,7 @@ import { recordBroken } from "./actions";
 export default async function BrokenPage() {
   const user = await syncUser();
   if (!user) {
-    redirect("/sign-in");
+    redirect("/login");
   }
 
   const products = await prisma.product.findMany({
