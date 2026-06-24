@@ -1,61 +1,44 @@
 import { addProduct } from "./actions";
+import Button from "@/components/Button";
 
 export default function AddProductForm() {
   return (
     <form
       action={addProduct}
-      style={{
-        display: "flex",
-        gap: "10px",
-        marginBottom: "30px",
-        flexWrap: "wrap",
-        alignItems: "flex-end",
-      }}
+      className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-3 flex-wrap items-end mb-6"
     >
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <label style={{ fontSize: "14px", marginBottom: "4px" }}>Nom</label>
+      <div className="flex flex-col gap-1">
+        <label className="text-sm text-gray-700">Nom</label>
         <input
           type="text"
           name="name"
           required
-          style={{ padding: "8px", border: "1px solid #ccc", borderRadius: "6px" }}
+          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-brand"
         />
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <label style={{ fontSize: "14px", marginBottom: "4px" }}>Prix (MAD)</label>
+      <div className="flex flex-col gap-1">
+        <label className="text-sm text-gray-700">Prix (MAD)</label>
         <input
           type="number"
           name="price"
           step="0.01"
           required
-          style={{ padding: "8px", border: "1px solid #ccc", borderRadius: "6px", width: "120px" }}
+          className="px-3 py-2 border border-gray-300 rounded-md w-32 focus:outline-none focus:border-brand"
         />
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <label style={{ fontSize: "14px", marginBottom: "4px" }}>Quantité</label>
+      <div className="flex flex-col gap-1">
+        <label className="text-sm text-gray-700">Quantité</label>
         <input
           type="number"
           name="quantity"
           required
-          style={{ padding: "8px", border: "1px solid #ccc", borderRadius: "6px", width: "120px" }}
+          className="px-3 py-2 border border-gray-300 rounded-md w-32 focus:outline-none focus:border-brand"
         />
       </div>
 
-      <button
-        type="submit"
-        style={{
-          padding: "9px 18px",
-          background: "#111",
-          color: "white",
-          border: "none",
-          borderRadius: "6px",
-          cursor: "pointer",
-        }}
-      >
-        Ajouter
-      </button>
+      <Button type="submit">Ajouter</Button>
     </form>
   );
 }

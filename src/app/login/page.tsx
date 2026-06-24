@@ -1,4 +1,5 @@
 import { login } from "./actions";
+import Button from "@/components/Button";
 
 export default async function LoginPage({
   searchParams,
@@ -8,76 +9,45 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        background: "#f7f7f7",
-      }}
-    >
+    <div className="flex justify-center items-center min-h-screen bg-background">
       <form
         action={login}
-        style={{
-          background: "white",
-          padding: "32px",
-          borderRadius: "10px",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "14px",
-          width: "300px",
-        }}
+        className="bg-white p-8 rounded-xl shadow-md flex flex-col gap-4 w-80"
       >
-        <h1 style={{ fontSize: "22px", fontWeight: "bold", textAlign: "center" }}>
-          Connexion
+        <h1 className="text-2xl font-bold text-center text-brand">
+          Shop System
         </h1>
+        <p className="text-center text-gray-500 text-sm -mt-2">Connexion</p>
 
         {error && (
-          <p style={{ color: "#c0392b", fontSize: "14px", textAlign: "center" }}>
+          <p className="text-red-600 text-sm text-center">
             Nom d&apos;utilisateur ou mot de passe incorrect.
           </p>
         )}
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <label style={{ fontSize: "14px", marginBottom: "4px" }}>
-            Nom d&apos;utilisateur
-          </label>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-gray-700">Nom d&apos;utilisateur</label>
           <input
             type="text"
             name="username"
             required
-            style={{ padding: "9px", border: "1px solid #ccc", borderRadius: "6px" }}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-brand"
           />
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <label style={{ fontSize: "14px", marginBottom: "4px" }}>
-            Mot de passe
-          </label>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-gray-700">Mot de passe</label>
           <input
             type="password"
             name="password"
             required
-            style={{ padding: "9px", border: "1px solid #ccc", borderRadius: "6px" }}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-brand"
           />
         </div>
 
-        <button
-          type="submit"
-          style={{
-            padding: "10px",
-            background: "#111",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            marginTop: "6px",
-          }}
-        >
+        <Button type="submit" className="mt-2">
           Se connecter
-        </button>
+        </Button>
       </form>
     </div>
   );

@@ -1,87 +1,66 @@
-import { syncUser } from "@/lib/syncUser";
+import { requireRole } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 import AddProductForm from "./AddProductForm";
 import { deleteProduct } from "./actions";
 import Link from "next/link";
+import Button from "@/components/Button";
 
 export default async function ProductsPage() {
-  // Make sure the user is logged in and in our database
-  const user = await syncUser();
-  if (!user) {
-    redirect("/login");
-  }
+  const user = await requireRole(["ADMIN", "STOCK"]);
 
-  // Get all products that belong to THIS user's shop
   const products = await prisma.product.findMany({
     where: { shopId: user.shopId },
     orderBy: { createdAt: "desc" },
   });
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "20px" }}>
-        Produits
-      </h1>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Produits</h1>
 
       <AddProductForm />
 
       {products.length === 0 ? (
-        <p style={{ color: "gray" }}>
+        <p className="text-gray-500">
           Aucun produit pour le moment. Ajoutez votre premier produit.
         </p>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ textAlign: "left", borderBottom: "2px solid #ddd" }}>
-              <th style={{ padding: "10px" }}>Nom</th>
-              <th style={{ padding: "10px" }}>Prix (MAD)</th>
-              <th style={{ padding: "10px" }}>Quantité</th>
-              <th style={{ padding: "10px" }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.id} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={{ padding: "10px" }}>{product.name}</td>
-                <td style={{ padding: "10px" }}>{product.price}</td>
-                <td style={{ padding: "10px" }}>{product.quantity}</td>
-                <td style={{ padding: "10px" }}>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <Link
-                      href={`/dashboard/products/${product.id}/edit`}
-                      style={{
-                        padding: "6px 12px",
-                        background: "#2980b9",
-                        color: "white",
-                        borderRadius: "6px",
-                        textDecoration: "none",
-                      }}
-                    >
-                      Modifier
-                    </Link>
-                    <form action={deleteProduct}>
-                      <input type="hidden" name="id" value={product.id} />
-                      <button
-                        type="submit"
-                        style={{
-                          padding: "6px 12px",
-                          background: "#c0392b",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Supprimer
-                      </button>
-                    </form>
-                  </div>
-                </td>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 text-left text-sm text-gray-600">
+                <th className="px-4 py-3">Nom</th>
+                <th className="px-4 py-3">Prix (MAD)</th>
+                <th className="px-4 py-3">Quantité</th>
+                <th className="px-4 py-3">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id} className="border-t border-gray-100">
+                  <td className="px-4 py-3">{product.name}</td>
+                  <td className="px-4 py-3">{product.price.toFixed(2)}</td>
+                  <td className="px-4 py-3">{product.quantity}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/dashboard/products/${product.id}/edit`}
+                        className="px-3 py-1.5 rounded-md text-white text-sm bg-brand hover:bg-brand-dark transition-colors"
+                      >
+                        Modifier
+                      </Link>
+                      <form action={deleteProduct}>
+                        <input type="hidden" name="id" value={product.id} />
+                        <Button variant="danger" className="px-3 py-1.5 text-sm">
+                          Supprimer
+                        </Button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

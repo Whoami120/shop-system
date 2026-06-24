@@ -1,13 +1,10 @@
-import { syncUser } from "@/lib/syncUser";
+import { requireRole } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 import { recordBroken } from "./actions";
+import Button from "@/components/Button";
 
 export default async function BrokenPage() {
-  const user = await syncUser();
-  if (!user) {
-    redirect("/login");
-  }
+  const user = await requireRole(["ADMIN", "STOCK"]);
 
   const products = await prisma.product.findMany({
     where: { shopId: user.shopId },
@@ -15,68 +12,56 @@ export default async function BrokenPage() {
   });
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "20px" }}>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">
         Produit cassé / perdu
       </h1>
 
       {products.length === 0 ? (
-        <p style={{ color: "gray" }}>Ajoutez d&apos;abord un produit.</p>
+        <p className="text-gray-500">Ajoutez d&apos;abord un produit.</p>
       ) : (
         <form
           action={recordBroken}
-          style={{ display: "flex", flexDirection: "column", gap: "14px", maxWidth: "320px" }}
+          className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-4 max-w-sm"
         >
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <label style={{ fontSize: "14px", marginBottom: "4px" }}>Produit</label>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-700">Produit</label>
             <select
               name="productId"
               required
-              style={{ padding: "8px", border: "1px solid #ccc", borderRadius: "6px" }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-brand"
             >
               {products.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name} (stock actuel : {p.quantity})
+                  {p.name} (stock : {p.quantity})
                 </option>
               ))}
             </select>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <label style={{ fontSize: "14px", marginBottom: "4px" }}>Quantité</label>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-700">Quantité</label>
             <input
               type="number"
               name="quantity"
               min="1"
               required
-              style={{ padding: "8px", border: "1px solid #ccc", borderRadius: "6px" }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-brand"
             />
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <label style={{ fontSize: "14px", marginBottom: "4px" }}>Raison</label>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-700">Raison</label>
             <input
               type="text"
               name="reason"
               placeholder="cassé, périmé, perdu..."
               required
-              style={{ padding: "8px", border: "1px solid #ccc", borderRadius: "6px" }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-brand"
             />
           </div>
 
-          <button
-            type="submit"
-            style={{
-              padding: "10px",
-              background: "#e67e22",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
-          >
-            Enregistrer
-          </button>
+          <Button type="submit">Enregistrer</Button>
         </form>
       )}
     </div>

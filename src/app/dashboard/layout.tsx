@@ -1,70 +1,82 @@
 import Link from "next/link";
+import { syncUser } from "@/lib/syncUser";
+import { getShopModules } from "@/lib/getShopModules";
+import { redirect } from "next/navigation";
 
-const links = [
-  { href: "/dashboard", label: "Tableau de bord" },
-  { href: "/dashboard/products", label: "Produits" },
-  { href: "/dashboard/reception", label: "Réception" },
-  { href: "/dashboard/sale", label: "Vente" },
-  { href: "/dashboard/broken", label: "Cassé / perdu" },
-  { href: "/dashboard/history", label: "Historique" },
+// Each link now also says which MODULE it belongs to
+const allLinks = [
+  { href: "/dashboard", label: "Tableau de bord", module: "dashboard", roles: ["ADMIN", "CASHIER", "STOCK"] },
+  { href: "/dashboard/products", label: "Produits", module: "inventory", roles: ["ADMIN", "STOCK"] },
+  { href: "/dashboard/broken", label: "Cassé / perdu", module: "inventory", roles: ["ADMIN", "STOCK"] },
+  { href: "/dashboard/history", label: "Historique", module: "inventory", roles: ["ADMIN"] },
+  { href: "/dashboard/sale", label: "Vente", module: "sales", roles: ["ADMIN", "CASHIER"] },
+  { href: "/dashboard/suppliers", label: "Fournisseurs", module: "purchases", roles: ["ADMIN", "STOCK"] },
+  { href: "/dashboard/receptions", label: "Réceptions", module: "purchases", roles: ["ADMIN", "STOCK"] },
+  { href: "/dashboard/users", label: "Utilisateurs", module: "settings", roles: ["ADMIN"] },
 ];
 
-export default function DashboardLayout({
+function roleLabel(role: string) {
+  if (role === "ADMIN") return "Admin";
+  if (role === "CASHIER") return "Caissier";
+  if (role === "STOCK") return "Stock";
+  return role;
+}
+
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      {/* Sidebar menu */}
-      <aside
-        style={{
-          width: "220px",
-          background: "#111",
-          color: "white",
-          padding: "20px",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <h2 style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "24px" }}>
-          Shop System
-        </h2>
+  const user = await syncUser();
+  if (!user) {
+    redirect("/login");
+  }
 
-        <nav style={{ display: "flex", flexDirection: "column", gap: "6px", flex: 1 }}>
+  // Get the modules this shop has enabled
+  const enabledModules = await getShopModules(user.shopId);
+
+  // Show a link only if: the shop has its module AND the user's role is allowed
+  const links = allLinks.filter(
+    (link) =>
+      enabledModules.includes(link.module) && link.roles.includes(user.role)
+  );
+
+  return (
+    <div className="flex min-h-screen">
+      <aside className="w-60 bg-slate-900 text-white flex flex-col">
+        <div className="px-5 py-5 border-b border-slate-700">
+          <h2 className="text-lg font-bold">Shop System</h2>
+        </div>
+
+        <div className="px-5 py-4 border-b border-slate-700">
+          <p className="text-sm font-medium">{user.name}</p>
+          <p className="text-xs text-slate-400">{roleLabel(user.role)}</p>
+        </div>
+
+        <nav className="flex flex-col gap-1 p-3 flex-1">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              style={{
-                color: "white",
-                textDecoration: "none",
-                padding: "10px 12px",
-                borderRadius: "6px",
-                fontSize: "15px",
-              }}
+              className="px-3 py-2 rounded-md text-sm text-slate-200 hover:bg-slate-700 hover:text-white transition-colors"
             >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div style={{ marginTop: "20px" }}>
-  <a
-    href="/logout"
-    style={{
-      color: "#bbb",
-      textDecoration: "none",
-      fontSize: "14px",
-    }}
-  >
-    Déconnexion
-  </a>
-</div>
+        <div className="p-3 border-t border-slate-700">
+          <Link
+            href="/logout"
+            prefetch={false}
+            className="block px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-red-600 hover:text-white transition-colors"
+          >
+            Déconnexion
+          </Link>
+        </div>
       </aside>
 
-      {/* Page content */}
-      <main style={{ flex: 1, background: "#f7f7f7" }}>{children}</main>
+      <main className="flex-1 bg-background">{children}</main>
     </div>
   );
 }
