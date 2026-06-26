@@ -6,7 +6,7 @@ export default async function NewReceptionPage() {
   const user = await requireModule("purchases", ["ADMIN", "STOCK"]);
 
   const products = await prisma.product.findMany({
-    where: { shopId: user.shopId },
+    where: { shopId: user.shopId, active: true },
     orderBy: { name: "asc" },
   });
 

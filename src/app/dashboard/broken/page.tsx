@@ -7,7 +7,7 @@ export default async function BrokenPage() {
   const user = await requireModule("inventory", ["ADMIN", "STOCK"]);
 
   const products = await prisma.product.findMany({
-    where: { shopId: user.shopId },
+    where: { shopId: user.shopId, active: true },
     orderBy: { name: "asc" },
   });
 

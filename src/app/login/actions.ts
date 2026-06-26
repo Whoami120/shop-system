@@ -28,7 +28,22 @@ export async function login(formData: FormData) {
     redirect("/login?error=1");
   }
 
-  // Correct! Create the session and go to dashboard
+  // Correct! Create the session
   await createSession(user.id);
-  redirect("/dashboard");
+
+  // Send each role to their home page
+  if (user.role === "SUPERADMIN") {
+    redirect("/owner");
+  }
+  if (user.role === "ADMIN") {
+    redirect("/dashboard");
+  }
+  if (user.role === "CASHIER") {
+    redirect("/dashboard/sale");
+  }
+  if (user.role === "STOCK") {
+    redirect("/dashboard/products");
+  }
+  // fallback
+  redirect("/dashboard/sale");
 }

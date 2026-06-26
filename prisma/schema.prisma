@@ -15,6 +15,7 @@ datasource db {
 model Shop {
   id        String   @id @default(cuid())
   name      String
+  imageUrl  String?
   createdAt DateTime @default(now())
 
   users       User[]
@@ -23,9 +24,11 @@ model Shop {
   suppliers   Supplier[]
   receptions  Reception[]
   shopModules ShopModule[]
+  sales       Sale[]
 }
 // ---------- USERS (with roles) ----------
 enum Role {
+  SUPERADMIN
   ADMIN
   CASHIER
   STOCK
@@ -44,6 +47,7 @@ model User {
   shopId    String
 
   stockMoves StockMove[]
+  sales      Sale[]
 }
 
 // ---------- PRODUCTS ----------
@@ -52,6 +56,9 @@ model Product {
   name      String
   price     Float    @default(0)
   quantity  Int      @default(0)
+  imageUrl  String?
+  tva       Int      @default(0)
+  active    Boolean  @default(true)
   createdAt DateTime @default(now())
 
   shop      Shop     @relation(fields: [shopId], references: [id])
@@ -59,6 +66,8 @@ model Product {
 
   stockMoves     StockMove[]
   receptionItems ReceptionItem[]
+  saleItems      SaleItem[]
+  
 }
 
 // ---------- STOCK MOVES (every change in stock) ----------
@@ -89,6 +98,7 @@ model Supplier {
   id        String   @id @default(cuid())
   name      String
   phone     String?
+  city      String?
   createdAt DateTime @default(now())
 
   shop   Shop   @relation(fields: [shopId], references: [id])
@@ -148,4 +158,31 @@ model ShopModule {
 
   // a shop can have each module only once
   @@unique([shopId, moduleId])
+}
+// ---------- SALE (the facture / ticket) ----------
+model Sale {
+  id        String   @id @default(cuid())
+  total     Float    @default(0)
+  createdAt DateTime @default(now())
+
+  shop   Shop   @relation(fields: [shopId], references: [id])
+  shopId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  items SaleItem[]
+}
+
+// ---------- SALE ITEM (one line in a facture) ----------
+model SaleItem {
+  id        String @id @default(cuid())
+  quantity  Int
+  price     Float  @default(0)
+
+  sale   Sale   @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  saleId String
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
 }
