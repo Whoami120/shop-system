@@ -17,13 +17,13 @@ export default function StatCard({
   };
 
   return (
-    <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm flex items-center gap-3">
+    <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-4 shadow-sm flex items-center gap-3">
       <div className={`w-11 h-11 rounded-lg flex items-center justify-center ${colors[color]}`}>
         {icon}
       </div>
       <div>
         <p className="text-xs text-gray-500">{label}</p>
-        <p className="text-xl font-bold text-gray-800 mt-0.5">{value}</p>
+        <p className="text-xl font-bold text-gray-800 dark:text-slate-100 mt-0.5">{value}</p>
       </div>
     </div>
   );

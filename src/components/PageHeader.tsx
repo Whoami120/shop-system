@@ -12,9 +12,9 @@ export default function PageHeader({
   return (
     <div className="flex items-start justify-between mb-5">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-slate-100">{title}</h1>
         {breadcrumb && (
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-gray-400 dark:text-slate-500 mt-1">
             {breadcrumb.map((c, i) => (
               <span key={i}>
                 {i > 0 && <span className="mx-1">/</span>}

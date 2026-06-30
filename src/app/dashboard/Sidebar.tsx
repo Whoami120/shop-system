@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   LogOut,
   ChevronDown,
@@ -122,8 +123,13 @@ export default function Sidebar({
         })}
       </nav>
 
+      {/* Theme toggle */}
+      <div className="px-3 pt-3">
+        <ThemeToggle />
+      </div>
+
       {/* User box / logout */}
-      <div className="p-3 border-t border-slate-800">
+      <div className="p-3 border-t border-slate-800 mt-2">
         <div className="flex items-center justify-between px-2 py-2">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-sm font-medium">
