@@ -74,7 +74,7 @@ export default function UsersClient({ users }: { users: User[] }) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50 text-left text-xs text-gray-500 uppercase">

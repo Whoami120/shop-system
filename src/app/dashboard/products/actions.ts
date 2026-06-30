@@ -4,6 +4,7 @@ import { syncUser } from "@/lib/syncUser";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logAction } from "@/lib/audit";
 
 export async function addProduct(formData: FormData) {
   const user = await syncUser();
@@ -32,9 +33,12 @@ export async function addProduct(formData: FormData) {
     },
   });
 
+  await logAction(user, "Produit créé", name);
+
   revalidatePath("/dashboard/products");
   redirect("/dashboard/products");
 }
+
 export async function deleteProduct(formData: FormData) {
   const user = await syncUser();
   if (!user) {
@@ -52,8 +56,11 @@ export async function deleteProduct(formData: FormData) {
     data: { active: false },
   });
 
+  await logAction(user, "Produit archivé", id);
+
   revalidatePath("/dashboard/products");
 }
+
 export async function updateProduct(formData: FormData) {
   const user = await syncUser();
   if (!user) {
@@ -84,6 +91,8 @@ export async function updateProduct(formData: FormData) {
       tva: tva,
     },
   });
+
+  await logAction(user, "Produit modifié", name);
 
   revalidatePath("/dashboard/products");
   redirect("/dashboard/products");

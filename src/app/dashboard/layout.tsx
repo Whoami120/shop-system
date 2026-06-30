@@ -53,6 +53,7 @@ export default async function DashboardLayout({
   if (enabledModules.includes("sales")) {
     const items = [];
     if (allow(["ADMIN", "CASHIER"])) items.push({ href: "/dashboard/sale", label: "Vente" });
+    if (allow(["ADMIN"])) items.push({ href: "/dashboard/sales-history", label: "Historique des ventes" });
     if (items.length > 0) {
       groups.push({ key: "sales", label: "Ventes", icon: <ShoppingCart size={18} />, items });
     }
@@ -70,15 +71,16 @@ export default async function DashboardLayout({
   if (enabledModules.includes("settings")) {
     const items = [];
     if (allow(["ADMIN"])) items.push({ href: "/dashboard/users", label: "Utilisateurs" });
+    if (allow(["ADMIN"])) items.push({ href: "/dashboard/settings", label: "Paramètres boutique" });
     if (items.length > 0) {
       groups.push({ key: "settings", label: "Paramètres", icon: <Settings size={18} />, items });
     }
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col md:flex-row min-h-screen">
       <Sidebar groups={groups} userName={user.name} userRole={roleLabel(user.role)} />
-      <main className="flex-1 bg-background">{children}</main>
+      <main className="flex-1 bg-background min-w-0">{children}</main>
     </div>
   );
 }

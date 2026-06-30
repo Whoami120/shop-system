@@ -1,5 +1,7 @@
 import { requireModule } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import ReceptionForm from "./ReceptionForm";
 
 export default async function NewReceptionPage() {
@@ -16,10 +18,18 @@ export default async function NewReceptionPage() {
   });
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "20px" }}>
-        Nouvelle réception
-      </h1>
+    <div className="p-6">
+      <Link href="/dashboard/receptions" className="text-brand text-sm hover:underline">
+        ← Retour aux réceptions
+      </Link>
+
+      <div className="mt-3">
+        <PageHeader
+          title="Nouvelle réception"
+          breadcrumb={[{ label: "Achats" }, { label: "Réceptions" }, { label: "Nouvelle" }]}
+        />
+      </div>
+
       <ReceptionForm products={products} suppliers={suppliers} />
     </div>
   );

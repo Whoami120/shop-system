@@ -38,6 +38,12 @@ export default async function ReceiptPage({
       >
         <div className="text-center mb-4">
           <h1 className="text-xl font-bold text-gray-800">{sale.shop.name}</h1>
+          {sale.shop.address && (
+            <p className="text-xs text-gray-500 mt-1">{sale.shop.address}</p>
+          )}
+          {sale.shop.phone && (
+            <p className="text-xs text-gray-500">Tél : {sale.shop.phone}</p>
+          )}
           <p className="text-xs text-gray-500 mt-1">Ticket de vente</p>
         </div>
 
@@ -87,7 +93,7 @@ export default async function ReceiptPage({
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-5">
-          Merci de votre visite 🙏
+          {sale.shop.receiptFooter || "Merci de votre visite 🙏"}
         </p>
       </div>
     </div>

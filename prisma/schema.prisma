@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider        = "prisma-client-js"
   output          = "../src/generated/prisma"
@@ -11,12 +6,15 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-// ---------- SHOP (each business is one tenant) ----------
+
 model Shop {
-  id        String   @id @default(cuid())
-  name      String
-  imageUrl  String?
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  name          String
+  imageUrl      String?
+  address       String?
+  phone         String?
+  receiptFooter String?
+  createdAt     DateTime @default(now())
 
   users       User[]
   products    Product[]
@@ -26,7 +24,7 @@ model Shop {
   shopModules ShopModule[]
   sales       Sale[]
 }
-// ---------- USERS (with roles) ----------
+
 enum Role {
   SUPERADMIN
   ADMIN
@@ -50,7 +48,6 @@ model User {
   sales      Sale[]
 }
 
-// ---------- PRODUCTS ----------
 model Product {
   id        String   @id @default(cuid())
   name      String
@@ -67,10 +64,8 @@ model Product {
   stockMoves     StockMove[]
   receptionItems ReceptionItem[]
   saleItems      SaleItem[]
-  
 }
 
-// ---------- STOCK MOVES (every change in stock) ----------
 enum MoveType {
   RECEPTION
   SALE
@@ -93,7 +88,7 @@ model StockMove {
   user      User     @relation(fields: [userId], references: [id])
   userId    String
 }
-// ---------- SUPPLIER (fournisseur) ----------
+
 model Supplier {
   id        String   @id @default(cuid())
   name      String
@@ -107,7 +102,6 @@ model Supplier {
   receptions Reception[]
 }
 
-// ---------- RECEPTION (the document / bon de réception) ----------
 model Reception {
   id        String   @id @default(cuid())
   total     Float    @default(0)
@@ -122,7 +116,6 @@ model Reception {
   items ReceptionItem[]
 }
 
-// ---------- RECEPTION ITEM (one line in a reception) ----------
 model ReceptionItem {
   id            String @id @default(cuid())
   quantity      Int
@@ -134,7 +127,7 @@ model ReceptionItem {
   product   Product @relation(fields: [productId], references: [id])
   productId String
 }
-// ---------- MODULE (the catalog of all modules) ----------
+
 model Module {
   id          String   @id @default(cuid())
   key         String   @unique
@@ -145,7 +138,6 @@ model Module {
   shopModules ShopModule[]
 }
 
-// ---------- SHOP MODULE (which shop has which module) ----------
 model ShopModule {
   id       String @id @default(cuid())
   enabled  Boolean @default(true)
@@ -156,10 +148,9 @@ model ShopModule {
   module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   moduleId String
 
-  // a shop can have each module only once
   @@unique([shopId, moduleId])
 }
-// ---------- SALE (the facture / ticket) ----------
+
 model Sale {
   id        String   @id @default(cuid())
   total     Float    @default(0)
@@ -174,7 +165,6 @@ model Sale {
   items SaleItem[]
 }
 
-// ---------- SALE ITEM (one line in a facture) ----------
 model SaleItem {
   id        String @id @default(cuid())
   quantity  Int
@@ -185,4 +175,15 @@ model SaleItem {
 
   product   Product @relation(fields: [productId], references: [id])
   productId String
+}
+// ---------- AUDIT LOG (who did what) ----------
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  shopId   String
+  userId   String
+  userName String
 }

@@ -91,11 +91,20 @@ export default function SuppliersClient({ suppliers }: { suppliers: Supplier[] }
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <div className="bg-white border border-gray-100 rounded-xl p-8 text-center text-gray-500">
-          Aucun fournisseur.
+        <div className="bg-white border border-gray-100 rounded-xl p-12 text-center shadow-sm">
+          <p className="text-gray-800 font-medium">Aucun fournisseur</p>
+          <p className="text-gray-500 text-sm mt-1">
+            Ajoutez votre premier fournisseur.
+          </p>
+          <button
+            onClick={openNew}
+            className="inline-block mt-4 px-4 py-2 rounded-md bg-brand text-white text-sm hover:bg-brand-dark transition-colors"
+          >
+            + Nouveau fournisseur
+          </button>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 text-left text-xs text-gray-500 uppercase">

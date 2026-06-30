@@ -9,8 +9,8 @@ export default async function OwnerLayout({
   const user = await requireSuperAdmin();
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-60 bg-indigo-950 text-white flex flex-col">
+    <div className="flex flex-col md:flex-row min-h-screen">
+      <aside className="w-full md:w-60 bg-indigo-950 text-white flex flex-col md:min-h-screen">
         <div className="px-5 py-5 border-b border-indigo-800">
           <h2 className="text-lg font-bold">Owner Panel</h2>
           <p className="text-xs text-indigo-300 mt-1">{user.name}</p>
@@ -36,7 +36,7 @@ export default async function OwnerLayout({
         </div>
       </aside>
 
-      <main className="flex-1 bg-background">{children}</main>
+      <main className="flex-1 bg-background min-w-0">{children}</main>
     </div>
   );
 }

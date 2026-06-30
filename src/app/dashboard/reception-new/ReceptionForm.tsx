@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createReception } from "./actions";
+import { Plus, Trash2 } from "lucide-react";
 
 type Product = { id: string; name: string; quantity: number };
 type Supplier = { id: string; name: string };
@@ -28,11 +29,9 @@ export default function ReceptionForm({
   function addLine() {
     setLines([...lines, { productId: "", quantity: 1, purchasePrice: 0 }]);
   }
-
   function removeLine(index: number) {
     setLines(lines.filter((_, i) => i !== index));
   }
-
   function updateLine(index: number, field: keyof Line, value: string) {
     const newLines = [...lines];
     if (field === "productId") {
@@ -43,10 +42,7 @@ export default function ReceptionForm({
     setLines(newLines);
   }
 
-  const total = lines.reduce(
-    (sum, l) => sum + l.quantity * l.purchasePrice,
-    0
-  );
+  const total = lines.reduce((sum, l) => sum + l.quantity * l.purchasePrice, 0);
 
   async function handleSave() {
     setSaving(true);
@@ -57,9 +53,10 @@ export default function ReceptionForm({
     "px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-brand";
 
   return (
-    <div className="max-w-3xl">
-      <div className="mb-5">
-        <label className="text-sm text-gray-700 mr-2">Fournisseur :</label>
+    <div className="max-w-4xl">
+      {/* Supplier */}
+      <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm mb-4">
+        <label className="text-sm text-gray-700 mr-3">Fournisseur :</label>
         <select
           value={supplierId}
           onChange={(e) => setSupplierId(e.target.value)}
@@ -74,10 +71,11 @@ export default function ReceptionForm({
         </select>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+      {/* Lines */}
+      <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden mb-4">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-50 text-left text-sm text-gray-600">
+            <tr className="bg-gray-50 text-left text-xs text-gray-500 uppercase">
               <th className="px-4 py-3">Produit</th>
               <th className="px-4 py-3">Quantité</th>
               <th className="px-4 py-3">Prix d&apos;achat</th>
@@ -117,9 +115,7 @@ export default function ReceptionForm({
                     min="0"
                     step="0.01"
                     value={line.purchasePrice}
-                    onChange={(e) =>
-                      updateLine(index, "purchasePrice", e.target.value)
-                    }
+                    onChange={(e) => updateLine(index, "purchasePrice", e.target.value)}
                     className={`${inputClass} w-28`}
                   />
                 </td>
@@ -130,9 +126,9 @@ export default function ReceptionForm({
                   {lines.length > 1 && (
                     <button
                       onClick={() => removeLine(index)}
-                      className="px-3 py-1.5 rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-md border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
                     >
-                      X
+                      <Trash2 size={15} />
                     </button>
                   )}
                 </td>
@@ -144,20 +140,23 @@ export default function ReceptionForm({
 
       <button
         onClick={addLine}
-        className="px-4 py-2 rounded-md text-white bg-brand hover:bg-brand-dark transition-colors mb-5"
+        className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors mb-5"
       >
-        + Ajouter une ligne
+        <Plus size={16} /> Ajouter une ligne
       </button>
 
-      <p className="text-lg font-bold mb-4">Total : {total.toFixed(2)} MAD</p>
-
-      <button
-        onClick={handleSave}
-        disabled={saving}
-        className="px-5 py-2.5 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-default text-base"
-      >
-        {saving ? "Enregistrement..." : "Enregistrer la réception"}
-      </button>
+      <div className="flex items-center justify-between bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+        <span className="text-lg font-bold text-gray-800">
+          Total : {total.toFixed(2)} MAD
+        </span>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-5 py-2.5 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+        >
+          {saving ? "Enregistrement..." : "Enregistrer la réception"}
+        </button>
+      </div>
     </div>
   );
 }

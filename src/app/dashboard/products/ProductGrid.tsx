@@ -36,10 +36,20 @@ export default function ProductGrid({ products }: { products: Product[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white border border-gray-100 rounded-xl p-8 text-center text-gray-500">
-          Aucun produit.
-        </div>
-      ) : (
+  <div className="bg-white border border-gray-100 rounded-xl p-12 text-center shadow-sm">
+    <p className="text-gray-800 font-medium">Aucun produit</p>
+    <p className="text-gray-500 text-sm mt-1">
+      Commencez par ajouter votre premier produit.
+    </p>
+
+    <Link
+      href="/dashboard/products/new"
+      className="inline-block mt-4 px-4 py-2 rounded-md bg-brand text-white text-sm hover:bg-brand-dark transition-colors"
+    >
+      + Nouveau produit
+    </Link>
+  </div>
+) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {filtered.map((p) => {
             const low = p.quantity <= 5;

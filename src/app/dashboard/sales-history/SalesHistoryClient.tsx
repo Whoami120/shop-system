@@ -1,40 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Search } from "lucide-react";
+import Link from "next/link";
+import { Search, Eye } from "lucide-react";
 
-type Move = {
+type Row = {
   id: string;
+  number: string;
   date: string;
-  type: string;
-  product: string;
-  quantity: number;
-  reason: string;
-  user: string;
+  cashier: string;
+  itemsCount: number;
+  total: number;
 };
 
-function typeLabel(type: string) {
-  if (type === "RECEPTION") return "Réception";
-  if (type === "SALE") return "Vente";
-  if (type === "BROKEN") return "Cassé / perdu";
-  return type;
-}
+const PAGE_SIZE = 10;
 
-function typeBadge(type: string) {
-  if (type === "RECEPTION") return "bg-green-50 text-green-700";
-  if (type === "SALE") return "bg-blue-50 text-blue-700";
-  if (type === "BROKEN") return "bg-orange-50 text-orange-700";
-  return "bg-gray-100 text-gray-600";
-}
-
-const PAGE_SIZE = 12;
-
-export default function HistoryClient({ moves }: { moves: Move[] }) {
+export default function SalesHistoryClient({ rows }: { rows: Row[] }) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const filtered = moves.filter((m) =>
-    (m.product + " " + m.user + " " + typeLabel(m.type)).toLowerCase().includes(search.toLowerCase())
+  const filtered = rows.filter((r) =>
+    (r.number + " " + r.cashier).toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -53,41 +39,48 @@ export default function HistoryClient({ moves }: { moves: Move[] }) {
             setSearch(e.target.value);
             setPage(1);
           }}
-          placeholder="Rechercher (produit, type, utilisateur)..."
+          placeholder="Rechercher (n° ou caissier)..."
           className="flex-1 outline-none text-sm bg-transparent"
         />
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white border border-gray-100 rounded-xl p-8 text-center text-gray-500">
-          Aucun mouvement.
+        <div className="bg-white border border-gray-100 rounded-xl p-12 text-center shadow-sm">
+          <p className="text-gray-800 font-medium">Aucune vente</p>
+          <p className="text-gray-500 text-sm mt-1">
+            Les ventes apparaîtront ici après le premier encaissement.
+          </p>
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 text-left text-xs text-gray-500 uppercase">
+                <th className="px-4 py-3">N°</th>
                 <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Produit</th>
-                <th className="px-4 py-3">Quantité</th>
-                <th className="px-4 py-3">Raison</th>
-                <th className="px-4 py-3">Par</th>
+                <th className="px-4 py-3">Caissier</th>
+                <th className="px-4 py-3">Articles</th>
+                <th className="px-4 py-3">Total (MAD)</th>
+                <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {pageRows.map((m) => (
-                <tr key={m.id} className="border-t border-gray-100 text-sm">
-                  <td className="px-4 py-3 text-gray-600">{m.date}</td>
+              {pageRows.map((r) => (
+                <tr key={r.id} className="border-t border-gray-100 text-sm">
+                  <td className="px-4 py-3 font-medium">{r.number}</td>
+                  <td className="px-4 py-3 text-gray-600">{r.date}</td>
+                  <td className="px-4 py-3">{r.cashier}</td>
+                  <td className="px-4 py-3">{r.itemsCount}</td>
+                  <td className="px-4 py-3 font-medium">{r.total.toFixed(2)}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-3 py-1 rounded-full ${typeBadge(m.type)}`}>
-                      {typeLabel(m.type)}
-                    </span>
+                    <Link
+                      href={`/dashboard/sale/receipt/${r.id}`}
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                      title="Voir le ticket"
+                    >
+                      <Eye size={16} />
+                    </Link>
                   </td>
-                  <td className="px-4 py-3">{m.product}</td>
-                  <td className="px-4 py-3">{m.quantity}</td>
-                  <td className="px-4 py-3 text-gray-600">{m.reason || "-"}</td>
-                  <td className="px-4 py-3 text-gray-600">{m.user}</td>
                 </tr>
               ))}
             </tbody>
