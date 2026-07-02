@@ -14,9 +14,14 @@ export async function addProduct(formData: FormData) {
 
   const name = formData.get("name") as string;
   const price = parseFloat(formData.get("price") as string);
+  const purchasePrice = parseFloat(formData.get("purchasePrice") as string) || 0;
   const quantity = parseInt(formData.get("quantity") as string);
   const imageUrl = formData.get("imageUrl") as string;
   const tva = parseInt(formData.get("tva") as string) || 0;
+  const categoryId = formData.get("categoryId") as string;
+  const brandId = formData.get("brandId") as string;
+  const unit = (formData.get("unit") as string) || "piece";
+  const barcode = formData.get("barcode") as string;
 
   if (!name || isNaN(price) || isNaN(quantity)) {
     redirect("/dashboard/products/new?error=invalid");
@@ -26,9 +31,14 @@ export async function addProduct(formData: FormData) {
     data: {
       name: name,
       price: price,
+      purchasePrice: purchasePrice,
       quantity: quantity,
       imageUrl: imageUrl || null,
       tva: tva,
+      categoryId: categoryId || null,
+      brandId: brandId || null,
+      unit: unit,
+      barcode: barcode || null,
       shopId: user.shopId,
     },
   });
@@ -70,9 +80,14 @@ export async function updateProduct(formData: FormData) {
   const id = formData.get("id") as string;
   const name = formData.get("name") as string;
   const price = parseFloat(formData.get("price") as string);
+  const purchasePrice = parseFloat(formData.get("purchasePrice") as string) || 0;
   const quantity = parseInt(formData.get("quantity") as string);
   const imageUrl = formData.get("imageUrl") as string;
   const tva = parseInt(formData.get("tva") as string) || 0;
+  const categoryId = formData.get("categoryId") as string;
+  const brandId = formData.get("brandId") as string;
+  const unit = (formData.get("unit") as string) || "piece";
+  const barcode = formData.get("barcode") as string;
 
   if (!name || isNaN(price) || isNaN(quantity)) {
     redirect(`/dashboard/products/${id}/edit?error=invalid`);
@@ -86,9 +101,14 @@ export async function updateProduct(formData: FormData) {
     data: {
       name: name,
       price: price,
+      purchasePrice: purchasePrice,
       quantity: quantity,
       imageUrl: imageUrl || null,
       tva: tva,
+      categoryId: categoryId || null,
+      brandId: brandId || null,
+      unit: unit,
+      barcode: barcode || null,
     },
   });
 

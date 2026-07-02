@@ -9,14 +9,29 @@ type Product = {
   id: string;
   name: string;
   price: number;
+  purchasePrice: number;
   quantity: number;
   imageUrl: string | null;
   tva: number;
+  categoryId: string | null;
+  brandId: string | null;
+  unit: string;
+  barcode: string | null;
 };
 
-export default function EditProductForm({ product }: { product: Product }) {
+export default function EditProductForm({
+  product,
+  categories,
+  brands,
+}: {
+  product: Product;
+  categories: { id: string; name: string }[];
+  brands: { id: string; name: string }[];
+}) {
   const [imageUrl, setImageUrl] = useState(product.imageUrl || "");
   const [tva, setTva] = useState(product.tva || 0);
+  const [price, setPrice] = useState(String(product.price));
+  const [purchasePrice, setPurchasePrice] = useState(String(product.purchasePrice));
 
   const inputClass =
     "px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-brand w-full";
@@ -54,19 +69,97 @@ export default function EditProductForm({ product }: { product: Product }) {
           <input type="text" name="name" required defaultValue={product.name} className={inputClass} />
         </div>
 
+        <div>
+          <label className="text-sm text-gray-700">Code-barres (optionnel)</label>
+          <input
+            type="text"
+            name="barcode"
+            defaultValue={product.barcode || ""}
+            className={inputClass}
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-sm text-gray-700">
-              Prix (MAD) <span className="text-red-600">*</span>
-            </label>
-            <input type="number" name="price" step="0.01" required defaultValue={product.price} className={inputClass} />
+            <label className="text-sm text-gray-700">Prix d&apos;achat (MAD)</label>
+            <input
+              type="number"
+              name="purchasePrice"
+              step="0.01"
+              value={purchasePrice}
+              onChange={(e) => setPurchasePrice(e.target.value)}
+              className={inputClass}
+            />
           </div>
           <div>
             <label className="text-sm text-gray-700">
-              Quantité <span className="text-red-600">*</span>
+              Prix de vente (MAD) <span className="text-red-600">*</span>
             </label>
-            <input type="number" name="quantity" required defaultValue={product.quantity} className={inputClass} />
+            <input
+              type="number"
+              name="price"
+              step="0.01"
+              required
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className={inputClass}
+            />
           </div>
+        </div>
+
+        {/* Margin display */}
+        {price && purchasePrice && (
+          <div className="text-sm bg-blue-50 text-blue-700 rounded-md px-3 py-2">
+            Marge : {(parseFloat(price) - parseFloat(purchasePrice)).toFixed(2)} MAD
+            {parseFloat(purchasePrice) > 0 && (
+              <span>
+                {" "}
+                ({(((parseFloat(price) - parseFloat(purchasePrice)) / parseFloat(purchasePrice)) * 100).toFixed(0)}%)
+              </span>
+            )}
+          </div>
+        )}
+
+        <div>
+          <label className="text-sm text-gray-700">
+            Quantité <span className="text-red-600">*</span>
+          </label>
+          <input type="number" name="quantity" required defaultValue={product.quantity} className={inputClass} />
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-700">Catégorie (optionnel)</label>
+          <select name="categoryId" defaultValue={product.categoryId || ""} className={inputClass}>
+            <option value="">-- Aucune --</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-700">Marque (optionnel)</label>
+          <select name="brandId" defaultValue={product.brandId || ""} className={inputClass}>
+            <option value="">-- Aucune --</option>
+            {brands.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-700">Unité</label>
+          <select name="unit" defaultValue={product.unit || "piece"} className={inputClass}>
+            <option value="piece">Pièce</option>
+            <option value="kg">Kg</option>
+            <option value="litre">Litre</option>
+            <option value="carton">Carton</option>
+            <option value="metre">Mètre</option>
+          </select>
         </div>
 
         <div>

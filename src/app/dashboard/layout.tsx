@@ -43,6 +43,8 @@ export default async function DashboardLayout({
   if (enabledModules.includes("inventory")) {
     const items = [];
     if (allow(["ADMIN", "STOCK"])) items.push({ href: "/dashboard/products", label: "Produits" });
+    if (allow(["ADMIN", "STOCK"])) items.push({ href: "/dashboard/categories", label: "Catégories" });
+    if (allow(["ADMIN", "STOCK"])) items.push({ href: "/dashboard/brands", label: "Marques" });
     if (allow(["ADMIN", "STOCK"])) items.push({ href: "/dashboard/broken", label: "Cassé / perdu" });
     if (allow(["ADMIN"])) items.push({ href: "/dashboard/history", label: "Historique" });
     if (items.length > 0) {

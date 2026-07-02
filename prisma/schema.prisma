@@ -23,6 +23,8 @@ model Shop {
   receptions  Reception[]
   shopModules ShopModule[]
   sales       Sale[]
+  categories  Category[]
+  brands      Brand[]
 }
 
 enum Role {
@@ -51,15 +53,24 @@ model User {
 model Product {
   id        String   @id @default(cuid())
   name      String
-  price     Float    @default(0)
-  quantity  Int      @default(0)
+  price         Float    @default(0)
+  purchasePrice Float    @default(0)
+  quantity      Int      @default(0)
   imageUrl  String?
   tva       Int      @default(0)
+  unit      String   @default("piece")
+  barcode   String?
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 
   shop      Shop     @relation(fields: [shopId], references: [id])
   shopId    String
+
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
+
+  brand   Brand?  @relation(fields: [brandId], references: [id])
+  brandId String?
 
   stockMoves     StockMove[]
   receptionItems ReceptionItem[]
@@ -186,4 +197,26 @@ model AuditLog {
   shopId   String
   userId   String
   userName String
+}
+// ---------- CATEGORY ----------
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  shop   Shop   @relation(fields: [shopId], references: [id])
+  shopId String
+
+  products Product[]
+}
+// ---------- BRAND ----------
+model Brand {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  shop   Shop   @relation(fields: [shopId], references: [id])
+  shopId String
+
+  products Product[]
 }

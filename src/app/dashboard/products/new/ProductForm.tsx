@@ -5,9 +5,17 @@ import { addProduct } from "../actions";
 import Button from "@/components/Button";
 import Link from "next/link";
 
-export default function ProductForm() {
+export default function ProductForm({
+  categories,
+  brands,
+}: {
+  categories: { id: string; name: string }[];
+  brands: { id: string; name: string }[];
+}) {
   const [imageUrl, setImageUrl] = useState("");
   const [tva, setTva] = useState(0);
+  const [price, setPrice] = useState("");
+  const [purchasePrice, setPurchasePrice] = useState("");
 
   const inputClass =
     "px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-brand w-full";
@@ -43,19 +51,94 @@ export default function ProductForm() {
           <input type="text" name="name" required className={inputClass} placeholder="ex : Lait Centrale 1L" />
         </div>
 
+        <div>
+          <label className="text-sm text-gray-700">Code-barres (optionnel)</label>
+          <input type="text" name="barcode" className={inputClass} placeholder="ex : 6111234567890" />
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-sm text-gray-700">
-              Prix (MAD) <span className="text-red-600">*</span>
-            </label>
-            <input type="number" name="price" step="0.01" required className={inputClass} placeholder="0.00" />
+            <label className="text-sm text-gray-700">Prix d&apos;achat (MAD)</label>
+            <input
+              type="number"
+              name="purchasePrice"
+              step="0.01"
+              value={purchasePrice}
+              onChange={(e) => setPurchasePrice(e.target.value)}
+              className={inputClass}
+              placeholder="0.00"
+            />
           </div>
           <div>
             <label className="text-sm text-gray-700">
-              Quantité <span className="text-red-600">*</span>
+              Prix de vente (MAD) <span className="text-red-600">*</span>
             </label>
-            <input type="number" name="quantity" required className={inputClass} placeholder="0" />
+            <input
+              type="number"
+              name="price"
+              step="0.01"
+              required
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className={inputClass}
+              placeholder="0.00"
+            />
           </div>
+        </div>
+
+        {/* Margin display */}
+        {price && purchasePrice && (
+          <div className="text-sm bg-blue-50 text-blue-700 rounded-md px-3 py-2">
+            Marge : {(parseFloat(price) - parseFloat(purchasePrice)).toFixed(2)} MAD
+            {parseFloat(purchasePrice) > 0 && (
+              <span>
+                {" "}
+                ({(((parseFloat(price) - parseFloat(purchasePrice)) / parseFloat(purchasePrice)) * 100).toFixed(0)}%)
+              </span>
+            )}
+          </div>
+        )}
+
+        <div>
+          <label className="text-sm text-gray-700">
+            Quantité <span className="text-red-600">*</span>
+          </label>
+          <input type="number" name="quantity" required className={inputClass} placeholder="0" />
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-700">Catégorie (optionnel)</label>
+          <select name="categoryId" className={inputClass}>
+            <option value="">-- Aucune --</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-700">Marque (optionnel)</label>
+          <select name="brandId" className={inputClass}>
+            <option value="">-- Aucune --</option>
+            {brands.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm text-gray-700">Unité</label>
+          <select name="unit" defaultValue="piece" className={inputClass}>
+            <option value="piece">Pièce</option>
+            <option value="kg">Kg</option>
+            <option value="litre">Litre</option>
+            <option value="carton">Carton</option>
+            <option value="metre">Mètre</option>
+          </select>
         </div>
 
         <div>

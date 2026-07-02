@@ -2,14 +2,25 @@ import { requireModule } from "@/lib/requireAdmin";
 import PageHeader from "@/components/PageHeader";
 import ProductForm from "./ProductForm";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 export default async function NewProductPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  await requireModule("inventory", ["ADMIN", "STOCK"]);
+  const user = await requireModule("inventory", ["ADMIN", "STOCK"]);
   const { error } = await searchParams;
+
+  const categories = await prisma.category.findMany({
+    where: { shopId: user.shopId },
+    orderBy: { name: "asc" },
+  });
+
+  const brands = await prisma.brand.findMany({
+    where: { shopId: user.shopId },
+    orderBy: { name: "asc" },
+  });
 
   return (
     <div className="p-6">
@@ -29,7 +40,7 @@ export default async function NewProductPage({
       )}
 
       <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm max-w-3xl">
-        <ProductForm />
+        <ProductForm categories={categories} brands={brands} />
       </div>
     </div>
   );

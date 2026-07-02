@@ -11,6 +11,11 @@ export default async function ProductsPage() {
   const products = await prisma.product.findMany({
     where: { shopId: user.shopId, active: true },
     orderBy: { createdAt: "desc" },
+    include: { category: true, brand: true },
+  });
+  const categories = await prisma.category.findMany({
+    where: { shopId: user.shopId },
+    orderBy: { name: "asc" },
   });
 
   return (
@@ -36,7 +41,12 @@ export default async function ProductsPage() {
           quantity: p.quantity,
           imageUrl: p.imageUrl,
           tva: p.tva,
+          categoryId: p.categoryId,
+          categoryName: p.category ? p.category.name : null,
+          brandName: p.brand ? p.brand.name : null,
+          barcode: p.barcode,
         }))}
+        categories={categories}
       />
     </div>
   );

@@ -3,6 +3,17 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ReceiptActions from "./ReceiptActions";
 
+function unitLabel(unit: string) {
+  const map: Record<string, string> = {
+    piece: "pièce",
+    kg: "kg",
+    litre: "litre",
+    carton: "carton",
+    metre: "mètre",
+  };
+  return map[unit] || unit;
+}
+
 export default async function ReceiptPage({
   params,
 }: {
@@ -75,7 +86,9 @@ export default async function ReceiptPage({
             {sale.items.map((item) => (
               <tr key={item.id} className="border-b border-gray-100">
                 <td className="py-1.5">{item.product.name}</td>
-                <td className="py-1.5 text-center">{item.quantity}</td>
+                <td className="py-1.5 text-center">
+                  {item.quantity} {unitLabel(item.product.unit)}
+                </td>
                 <td className="py-1.5 text-right">{item.price.toFixed(2)}</td>
                 <td className="py-1.5 text-right">
                   {(item.price * item.quantity).toFixed(2)}

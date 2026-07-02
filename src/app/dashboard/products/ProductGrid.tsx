@@ -12,27 +12,55 @@ type Product = {
   quantity: number;
   imageUrl: string | null;
   tva: number;
+  categoryId: string | null;
+  categoryName: string | null;
+  brandName: string | null;
+  barcode: string | null;
 };
 
-export default function ProductGrid({ products }: { products: Product[] }) {
+export default function ProductGrid({
+  products,
+  categories,
+}: {
+  products: Product[];
+  categories: { id: string; name: string }[];
+}) {
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
 
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = products.filter((p) => {
+    const text = (p.name + " " + (p.barcode || "")).toLowerCase();
+    const matchName = text.includes(search.toLowerCase());
+    const matchCategory = categoryFilter === "" || p.categoryId === categoryFilter;
+    return matchName && matchCategory;
+  });
 
   return (
     <div>
-      {/* Search */}
-      <div className="flex items-center gap-2 border border-gray-300 rounded-md px-3 py-2 mb-5 bg-white max-w-md">
-        <Search size={16} className="text-gray-400" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher un produit..."
-          className="flex-1 outline-none text-sm bg-transparent"
-        />
+      {/* Search + filter */}
+      <div className="flex items-center gap-3 mb-5 flex-wrap">
+        <div className="flex items-center gap-2 border border-gray-300 rounded-md px-3 py-2 bg-white flex-1 max-w-md">
+          <Search size={16} className="text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un produit..."
+            className="flex-1 outline-none text-sm bg-transparent"
+          />
+        </div>
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-brand"
+        >
+          <option value="">Toutes les catégories</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {filtered.length === 0 ? (
@@ -70,6 +98,11 @@ export default function ProductGrid({ products }: { products: Product[] }) {
                 {/* Info */}
                 <div className="p-3 flex-1 flex flex-col">
                   <p className="text-sm font-medium text-gray-800">{p.name}</p>
+                  {(p.categoryName || p.brandName) && (
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {[p.categoryName, p.brandName].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-sm font-bold text-brand">
                       {p.price.toFixed(2)} MAD

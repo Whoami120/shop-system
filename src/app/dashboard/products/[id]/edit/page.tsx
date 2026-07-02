@@ -17,6 +17,16 @@ export default async function EditProductPage({
     where: { id: id, shopId: user.shopId },
   });
 
+  const categories = await prisma.category.findMany({
+    where: { shopId: user.shopId },
+    orderBy: { name: "asc" },
+  });
+
+  const brands = await prisma.brand.findMany({
+    where: { shopId: user.shopId },
+    orderBy: { name: "asc" },
+  });
+
   if (!product) {
     notFound();
   }
@@ -40,10 +50,17 @@ export default async function EditProductPage({
             id: product.id,
             name: product.name,
             price: product.price,
+            purchasePrice: product.purchasePrice,
             quantity: product.quantity,
             imageUrl: product.imageUrl,
             tva: product.tva,
+            categoryId: product.categoryId,
+            brandId: product.brandId,
+            unit: product.unit,
+            barcode: product.barcode,
           }}
+          categories={categories}
+          brands={brands}
         />
       </div>
     </div>
