@@ -58,6 +58,7 @@ export default async function EditProductPage({
             brandId: product.brandId,
             unit: product.unit,
             barcode: product.barcode,
+            lowStockLevel: product.lowStockLevel,
           }}
           categories={categories}
           brands={brands}

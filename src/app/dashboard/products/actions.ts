@@ -22,6 +22,7 @@ export async function addProduct(formData: FormData) {
   const brandId = formData.get("brandId") as string;
   const unit = (formData.get("unit") as string) || "piece";
   const barcode = formData.get("barcode") as string;
+  const lowStockLevel = parseInt(formData.get("lowStockLevel") as string) || 5;
 
   if (!name || isNaN(price) || isNaN(quantity)) {
     redirect("/dashboard/products/new?error=invalid");
@@ -40,6 +41,7 @@ export async function addProduct(formData: FormData) {
       unit: unit,
       barcode: barcode || null,
       shopId: user.shopId,
+      lowStockLevel: lowStockLevel,
     },
   });
 
@@ -88,6 +90,7 @@ export async function updateProduct(formData: FormData) {
   const brandId = formData.get("brandId") as string;
   const unit = (formData.get("unit") as string) || "piece";
   const barcode = formData.get("barcode") as string;
+  const lowStockLevel = parseInt(formData.get("lowStockLevel") as string) || 5;
 
   if (!name || isNaN(price) || isNaN(quantity)) {
     redirect(`/dashboard/products/${id}/edit?error=invalid`);
@@ -109,6 +112,7 @@ export async function updateProduct(formData: FormData) {
       brandId: brandId || null,
       unit: unit,
       barcode: barcode || null,
+      lowStockLevel: lowStockLevel,
     },
   });
 

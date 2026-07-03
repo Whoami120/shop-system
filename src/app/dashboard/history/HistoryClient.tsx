@@ -17,6 +17,8 @@ function typeLabel(type: string) {
   if (type === "RECEPTION") return "Réception";
   if (type === "SALE") return "Vente";
   if (type === "BROKEN") return "Cassé / perdu";
+  if (type === "ADJUSTMENT") return "Ajustement";
+  if (type === "RETURN") return "Retour";
   return type;
 }
 
@@ -24,6 +26,8 @@ function typeBadge(type: string) {
   if (type === "RECEPTION") return "bg-green-50 text-green-700";
   if (type === "SALE") return "bg-blue-50 text-blue-700";
   if (type === "BROKEN") return "bg-orange-50 text-orange-700";
+  if (type === "ADJUSTMENT") return "bg-purple-50 text-purple-700";
+  if (type === "RETURN") return "bg-teal-50 text-teal-700";
   return "bg-gray-100 text-gray-600";
 }
 

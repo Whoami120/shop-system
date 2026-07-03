@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   Boxes,
+  Bell,
 } from "lucide-react";
 
 type Item = { href: string; label: string };
@@ -24,10 +25,12 @@ export default function Sidebar({
   groups,
   userName,
   userRole,
+  lowStockCount,
 }: {
   groups: Group[];
   userName: string;
   userRole: string;
+  lowStockCount: number;
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -59,6 +62,24 @@ export default function Sidebar({
       <div className="px-5 py-4 border-b border-slate-800">
         <p className="text-sm font-medium">{userName}</p>
         <p className="text-xs text-slate-400">{userRole}</p>
+      </div>
+
+      {/* Low-stock notification */}
+      <div className="px-3 pt-3">
+        <Link
+          href="/dashboard/low-stock"
+          onClick={() => setMobileOpen(false)}
+          className="flex items-center justify-between px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            <Bell size={16} /> Stock bas
+          </span>
+          {lowStockCount > 0 && (
+            <span className="bg-red-500 text-white text-xs font-medium rounded-full px-2 py-0.5 min-w-5 text-center">
+              {lowStockCount}
+            </span>
+          )}
+        </Link>
       </div>
 
       {/* Nav */}

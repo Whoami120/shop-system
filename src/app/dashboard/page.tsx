@@ -57,7 +57,7 @@ export default async function DashboardPage() {
     stockValue += p.price * p.quantity;
   }
 
-  const lowStock = products.filter((p) => p.quantity <= 5);
+  const lowStock = products.filter((p) => p.quantity <= p.lowStockLevel);
 
   const today = new Date().toLocaleDateString("fr-FR", {
     weekday: "long",

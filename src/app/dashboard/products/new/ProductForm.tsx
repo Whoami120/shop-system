@@ -99,11 +99,17 @@ export default function ProductForm({
           </div>
         )}
 
-        <div>
-          <label className="text-sm text-gray-700">
-            Quantité <span className="text-red-600">*</span>
-          </label>
-          <input type="number" name="quantity" required className={inputClass} placeholder="0" />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-sm text-gray-700">
+              Quantité <span className="text-red-600">*</span>
+            </label>
+            <input type="number" name="quantity" required className={inputClass} placeholder="0" />
+          </div>
+          <div>
+            <label className="text-sm text-gray-700">Alerte stock bas</label>
+            <input type="number" name="lowStockLevel" defaultValue={5} className={inputClass} placeholder="5" />
+          </div>
         </div>
 
         <div>

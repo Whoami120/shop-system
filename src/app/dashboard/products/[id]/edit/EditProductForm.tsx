@@ -17,6 +17,7 @@ type Product = {
   brandId: string | null;
   unit: string;
   barcode: string | null;
+  lowStockLevel: number;
 };
 
 export default function EditProductForm({
@@ -120,11 +121,17 @@ export default function EditProductForm({
           </div>
         )}
 
-        <div>
-          <label className="text-sm text-gray-700">
-            Quantité <span className="text-red-600">*</span>
-          </label>
-          <input type="number" name="quantity" required defaultValue={product.quantity} className={inputClass} />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-sm text-gray-700">
+              Quantité <span className="text-red-600">*</span>
+            </label>
+            <input type="number" name="quantity" required defaultValue={product.quantity} className={inputClass} />
+          </div>
+          <div>
+            <label className="text-sm text-gray-700">Alerte stock bas</label>
+            <input type="number" name="lowStockLevel" defaultValue={product.lowStockLevel} className={inputClass} />
+          </div>
         </div>
 
         <div>

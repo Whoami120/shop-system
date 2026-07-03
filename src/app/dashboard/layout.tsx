@@ -1,5 +1,6 @@
 import { syncUser } from "@/lib/syncUser";
 import { getShopModules } from "@/lib/getShopModules";
+import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Sidebar from "./Sidebar";
 import { LayoutDashboard, Boxes, ShoppingCart, Truck, Settings } from "lucide-react";
@@ -25,6 +26,14 @@ export default async function DashboardLayout({
   const enabledModules = await getShopModules(user.shopId);
   const role = user.role;
 
+  // Count low-stock products for the notification badge
+  const lowStockProducts = await prisma.product.findMany({
+    where: { shopId: user.shopId, active: true },
+  });
+  const lowStockCount = lowStockProducts.filter(
+    (p) => p.quantity <= p.lowStockLevel
+  ).length;
+
   // Helper: keep an item only if the role allows it
   const allow = (roles: string[]) => roles.includes(role);
 
@@ -43,9 +52,12 @@ export default async function DashboardLayout({
   if (enabledModules.includes("inventory")) {
     const items = [];
     if (allow(["ADMIN", "STOCK"])) items.push({ href: "/dashboard/products", label: "Produits" });
+    if (allow(["ADMIN"])) items.push({ href: "/dashboard/import", label: "Importer" });
     if (allow(["ADMIN", "STOCK"])) items.push({ href: "/dashboard/categories", label: "Catégories" });
     if (allow(["ADMIN", "STOCK"])) items.push({ href: "/dashboard/brands", label: "Marques" });
     if (allow(["ADMIN", "STOCK"])) items.push({ href: "/dashboard/broken", label: "Cassé / perdu" });
+    if (allow(["ADMIN"])) items.push({ href: "/dashboard/stock-adjust", label: "Ajustement de stock" });
+    if (allow(["ADMIN", "CASHIER"])) items.push({ href: "/dashboard/returns", label: "Retours" });
     if (allow(["ADMIN"])) items.push({ href: "/dashboard/history", label: "Historique" });
     if (items.length > 0) {
       groups.push({ key: "inventory", label: "Inventaire", icon: <Boxes size={18} />, items });
@@ -81,7 +93,12 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
-      <Sidebar groups={groups} userName={user.name} userRole={roleLabel(user.role)} />
+      <Sidebar
+        groups={groups}
+        userName={user.name}
+        userRole={roleLabel(user.role)}
+        lowStockCount={lowStockCount}
+      />
       <main className="flex-1 bg-background min-w-0">{children}</main>
     </div>
   );
