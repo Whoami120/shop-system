@@ -10,6 +10,7 @@ type Product = {
   price: number;
   quantity: number;
   imageUrl: string | null;
+  barcode: string | null;
 };
 
 type CartItem = {
@@ -26,9 +27,10 @@ export default function Pos({ products }: { products: Product[] }) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = products.filter((p) => {
+    const text = (p.name + " " + (p.barcode || "")).toLowerCase();
+    return text.includes(search.toLowerCase());
+  });
 
   function addToCart(p: Product) {
     setMessage("");

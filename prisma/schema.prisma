@@ -25,6 +25,7 @@ model Shop {
   sales       Sale[]
   categories  Category[]
   brands      Brand[]
+  customers   Customer[]
 }
 
 enum Role {
@@ -176,6 +177,9 @@ model Sale {
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId String?
+
   items SaleItem[]
 }
 
@@ -222,4 +226,18 @@ model Brand {
   shopId String
 
   products Product[]
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  address   String?
+  city      String?
+  createdAt DateTime @default(now())
+
+  shop   Shop   @relation(fields: [shopId], references: [id])
+  shopId String
+
+  sales Sale[]
 }

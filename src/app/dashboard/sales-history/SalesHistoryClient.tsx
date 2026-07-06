@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, FileText } from "lucide-react";
 
 type Row = {
   id: string;
@@ -73,13 +73,22 @@ export default function SalesHistoryClient({ rows }: { rows: Row[] }) {
                   <td className="px-4 py-3">{r.itemsCount}</td>
                   <td className="px-4 py-3 font-medium">{r.total.toFixed(2)}</td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/dashboard/sale/receipt/${r.id}`}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
-                      title="Voir le ticket"
-                    >
-                      <Eye size={16} />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/dashboard/sale/receipt/${r.id}`}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                        title="Voir le ticket"
+                      >
+                        <Eye size={16} />
+                      </Link>
+                      <Link
+                        href={`/dashboard/sales-history/invoice/${r.id}`}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                        title="Voir la facture"
+                      >
+                        <FileText size={16} />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

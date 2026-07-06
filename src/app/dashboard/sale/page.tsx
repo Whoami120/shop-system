@@ -24,6 +24,7 @@ export default async function SalePage() {
           price: p.price,
           quantity: p.quantity,
           imageUrl: p.imageUrl,
+          barcode: p.barcode,
         }))}
       />
     </div>

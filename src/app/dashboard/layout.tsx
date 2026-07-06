@@ -68,6 +68,7 @@ export default async function DashboardLayout({
     const items = [];
     if (allow(["ADMIN", "CASHIER"])) items.push({ href: "/dashboard/sale", label: "Vente" });
     if (allow(["ADMIN"])) items.push({ href: "/dashboard/sales-history", label: "Historique des ventes" });
+    if (allow(["ADMIN", "CASHIER"])) items.push({ href: "/dashboard/customers", label: "Clients" });
     if (items.length > 0) {
       groups.push({ key: "sales", label: "Ventes", icon: <ShoppingCart size={18} />, items });
     }
