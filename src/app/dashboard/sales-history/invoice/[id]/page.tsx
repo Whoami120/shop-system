@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import InvoiceActions from "./InvoiceActions";
+import RefundButton from "./RefundButton";
 
 function unitLabel(unit: string) {
   const map: Record<string, string> = {
@@ -29,6 +30,7 @@ export default async function InvoicePage({
       items: { include: { product: true } },
       user: true,
       shop: true,
+      customer: true,
     },
   });
 
@@ -42,7 +44,10 @@ export default async function InvoicePage({
         <Link href="/dashboard/sales-history" className="text-brand text-sm hover:underline">
           ← Retour à l&apos;historique
         </Link>
-        <InvoiceActions />
+        <div className="flex items-center gap-3">
+          <RefundButton saleId={sale.id} alreadyRefunded={sale.refunded} />
+          <InvoiceActions />
+        </div>
       </div>
 
       {/* Invoice sheet */}
@@ -59,6 +64,11 @@ export default async function InvoicePage({
           </div>
           <div className="text-right">
             <h2 className="text-xl font-bold text-gray-700">FACTURE</h2>
+            {sale.refunded && (
+              <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-700">
+                Remboursée
+              </span>
+            )}
             <p className="text-sm text-gray-500 mt-1">
               N° {sale.id.slice(-6).toUpperCase()}
             </p>
@@ -74,6 +84,9 @@ export default async function InvoicePage({
 
         {/* Meta */}
         <div className="mb-6 text-sm text-gray-600">
+          {sale.customer && (
+            <p>Client : <span className="font-medium text-gray-800">{sale.customer.name}</span></p>
+          )}
           <p>Caissier : <span className="font-medium text-gray-800">{sale.user.name}</span></p>
         </div>
 

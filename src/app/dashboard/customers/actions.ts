@@ -78,3 +78,45 @@ export async function deleteCustomer(formData: FormData) {
 
   revalidatePath("/dashboard/customers");
 }
+
+export async function recordPayment(formData: FormData) {
+  const user = await requireModule("sales", ["ADMIN", "CASHIER"]);
+
+  const customerId = formData.get("customerId") as string;
+  const amount = parseFloat(formData.get("amount") as string);
+  const method = formData.get("method") as string;
+  const note = formData.get("note") as string;
+
+  if (!customerId || isNaN(amount) || amount <= 0) {
+    redirect(`/dashboard/customers/${customerId}?error=invalid`);
+  }
+
+  const customer = await prisma.customer.findFirst({
+    where: { id: customerId, shopId: user.shopId },
+  });
+  if (!customer) {
+    redirect("/dashboard/customers?error=notfound");
+  }
+
+  await prisma.customerTransaction.create({
+    data: {
+      type: "PAYMENT",
+      amount: amount,
+      method: method || null,
+      note: note || null,
+      customerId: customerId,
+      shopId: user.shopId,
+      userId: user.id,
+    },
+  });
+
+  await logAction(
+    user,
+    "Paiement client",
+    customer.name + " : " + amount.toFixed(2) + " MAD"
+  );
+
+  revalidatePath(`/dashboard/customers/${customerId}`);
+  revalidatePath("/dashboard/customers");
+  redirect(`/dashboard/customers/${customerId}?ok=payment`);
+}

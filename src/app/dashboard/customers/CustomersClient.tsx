@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, Plus, Phone, MapPin, X, Pencil, Trash2 } from "lucide-react";
 import { addCustomer, updateCustomer, deleteCustomer } from "./actions";
+import Link from "next/link";
 
 type Customer = {
   id: string;
@@ -109,7 +110,12 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium ${colorFor(c.name)}`}>
                         {initials(c.name)}
                       </div>
-                      <span className="font-medium text-gray-800">{c.name}</span>
+                      <Link
+                        href={`/dashboard/customers/${c.id}`}
+                        className="font-medium text-gray-800 hover:text-brand hover:underline"
+                      >
+                        {c.name}
+                      </Link>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">
@@ -122,6 +128,9 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">
+                    {c.city || <span className="text-gray-400">-</span>}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
                     {c.address ? (
                       <span className="flex items-center gap-1.5">
                         <MapPin size={13} className="text-gray-400" /> {c.address}
@@ -129,10 +138,6 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{c.salesCount}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {c.city || <span className="text-gray-400">-</span>}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">{c.salesCount}</td>
                   <td className="px-4 py-3">
@@ -247,7 +252,7 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-brand mt-1"
                 />
               </div>
-                
+
               <div>
                 <label className="text-sm text-gray-700">Adresse</label>
                 <input

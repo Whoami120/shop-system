@@ -1,6 +1,7 @@
 import { requireSuperAdmin } from "@/lib/requireSuperAdmin";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import DeleteShopButton from "./DeleteShopButton";
 
 export default async function OwnerHomePage({
   searchParams,
@@ -10,16 +11,18 @@ export default async function OwnerHomePage({
   await requireSuperAdmin();
   const { created } = await searchParams;
 
-  // Get all shops, with how many users and modules each has
   const shops = await prisma.shop.findMany({
     orderBy: { createdAt: "desc" },
     include: {
       _count: {
         select: { users: true, shopModules: true },
       },
+      users: {
+        where: { role: "SUPERADMIN" },
+        select: { id: true },
+      },
     },
   });
-
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
@@ -36,9 +39,9 @@ export default async function OwnerHomePage({
         <p className="text-gray-500">Aucune boutique.</p>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            {created === "1" && (
-            <p className="text-green-600 mb-4">Boutique créée avec succès.</p>
-            )}
+          {created === "1" && (
+            <p className="text-green-600 p-4">Boutique créée avec succès.</p>
+          )}
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 text-left text-sm text-gray-600">
@@ -46,7 +49,7 @@ export default async function OwnerHomePage({
                 <th className="px-4 py-3">Utilisateurs</th>
                 <th className="px-4 py-3">Modules actifs</th>
                 <th className="px-4 py-3">Créée le</th>
-                <th className="px-4 py-3">Gérer</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -59,12 +62,17 @@ export default async function OwnerHomePage({
                     {shop.createdAt.toLocaleDateString("fr-FR")}
                   </td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/owner/shops/${shop.id}`}
-                      className="text-brand hover:underline"
-                    >
-                      Gérer
-                    </Link>
+                    <div className="flex items-center justify-end gap-4">
+                      <Link
+                        href={`/owner/shops/${shop.id}`}
+                        className="text-brand hover:underline"
+                      >
+                        Gérer
+                      </Link>
+                      {shop.users.length === 0 && (
+                        <DeleteShopButton shopId={shop.id} />
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

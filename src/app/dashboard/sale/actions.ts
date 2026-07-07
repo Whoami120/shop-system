@@ -9,7 +9,11 @@ type CartLine = {
   quantity: number;
 };
 
-export async function checkout(lines: CartLine[]) {
+export async function checkout(
+  lines: CartLine[],
+  customerId?: string | null,
+  amountPaid?: number | null
+) {
   const user = await syncUser();
   if (!user) {
     throw new Error("Not logged in");
@@ -62,8 +66,30 @@ export async function checkout(lines: CartLine[]) {
         total: total,
         shopId: user.shopId,
         userId: user.id,
+        customerId: customerId || null,
       },
     });
+
+    // If a customer is set and they didn't pay the full amount,
+    // add the unpaid part to their balance (credit).
+    if (customerId && amountPaid != null) {
+      const creditAmount = total - amountPaid;
+      if (creditAmount > 0) {
+        await tx.customerTransaction.create({
+          data: {
+            type: "CREDIT",
+            amount: creditAmount,
+            note:
+              amountPaid > 0
+                ? `Vente: payé ${amountPaid.toFixed(2)}, crédit ${creditAmount.toFixed(2)}`
+                : "Vente à crédit",
+            customerId: customerId,
+            shopId: user.shopId,
+            userId: user.id,
+          },
+        });
+      }
+    }
 
     // 2. For each line: save sale item, lower stock, save StockMove
     for (const d of detailed) {
@@ -99,4 +125,66 @@ export async function checkout(lines: CartLine[]) {
   revalidatePath("/dashboard/products");
 
   return saleId;
+}
+
+export async function refundSale(saleId: string) {
+  const user = await syncUser();
+  if (!user) {
+    throw new Error("Not logged in");
+  }
+
+  const sale = await prisma.sale.findFirst({
+    where: { id: saleId, shopId: user.shopId },
+    include: { items: true },
+  });
+  if (!sale) {
+    throw new Error("Vente introuvable");
+  }
+  if (sale.refunded) {
+    throw new Error("Cette vente est déjà remboursée");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    // 1. Return each item's stock + log a REFUND move
+    for (const item of sale.items) {
+      await tx.product.update({
+        where: { id: item.productId },
+        data: { quantity: { increment: item.quantity } },
+      });
+      await tx.stockMove.create({
+        data: {
+          type: "REFUND",
+          quantity: item.quantity,
+          reason: "Remboursement vente",
+          productId: item.productId,
+          shopId: user.shopId,
+          userId: user.id,
+        },
+      });
+    }
+
+    // 2. Mark the sale as refunded
+    await tx.sale.update({
+      where: { id: saleId },
+      data: { refunded: true },
+    });
+
+    // 3. If it was a credit sale, reverse the customer's debt (a PAYMENT of the total)
+    if (sale.customerId) {
+      await tx.customerTransaction.create({
+        data: {
+          type: "PAYMENT",
+          amount: sale.total,
+          method: null,
+          note: "Remboursement vente",
+          customerId: sale.customerId,
+          shopId: user.shopId,
+          userId: user.id,
+        },
+      });
+    }
+  });
+
+  revalidatePath("/dashboard/sales-history");
+  revalidatePath("/dashboard/products");
 }

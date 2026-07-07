@@ -85,6 +85,7 @@ enum MoveType {
   BROKEN
   ADJUSTMENT
   RETURN
+  REFUND
 }
 
 model StockMove {
@@ -169,6 +170,7 @@ model ShopModule {
 model Sale {
   id        String   @id @default(cuid())
   total     Float    @default(0)
+  refunded  Boolean  @default(false)
   createdAt DateTime @default(now())
 
   shop   Shop   @relation(fields: [shopId], references: [id])
@@ -239,5 +241,27 @@ model Customer {
   shop   Shop   @relation(fields: [shopId], references: [id])
   shopId String
 
-  sales Sale[]
+  sales        Sale[]
+  transactions CustomerTransaction[]
+}
+
+// ---------- CUSTOMER TRANSACTION (credit / payment) ----------
+enum TransactionType {
+  CREDIT
+  PAYMENT
+}
+
+model CustomerTransaction {
+  id        String          @id @default(cuid())
+  type      TransactionType
+  amount    Float
+  method    String?
+  note      String?
+  createdAt DateTime        @default(now())
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String
+
+  shopId String
+  userId String
 }

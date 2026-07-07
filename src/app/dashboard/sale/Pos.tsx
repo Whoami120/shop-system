@@ -21,9 +21,18 @@ type CartItem = {
   stock: number;
 };
 
-export default function Pos({ products }: { products: Product[] }) {
+export default function Pos({
+  products,
+  customers,
+}: {
+  products: Product[];
+  customers: { id: string; name: string }[];
+}) {
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [customerId, setCustomerId] = useState("");
+  const [payMode, setPayMode] = useState<"paid" | "partial" | "credit">("paid");
+  const [partialPaid, setPartialPaid] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -37,7 +46,6 @@ export default function Pos({ products }: { products: Product[] }) {
     setCart((prev) => {
       const found = prev.find((c) => c.productId === p.id);
       if (found) {
-        // already in cart → +1 (but not over stock)
         if (found.qty >= p.quantity) return prev;
         return prev.map((c) =>
           c.productId === p.id ? { ...c, qty: c.qty + 1 } : c
@@ -50,13 +58,41 @@ export default function Pos({ products }: { products: Product[] }) {
     });
   }
 
+  function handleScan() {
+    const query = search.trim();
+    if (!query) return;
+
+    // First: exact barcode match (what a scanner sends)
+    let match = products.find((p) => p.barcode && p.barcode === query);
+
+    // If no exact barcode, and only one product matches the search text, use it
+    if (!match) {
+      const matches = products.filter((p) => {
+        const text = (p.name + " " + (p.barcode || "")).toLowerCase();
+        return text.includes(query.toLowerCase());
+      });
+      if (matches.length === 1) match = matches[0];
+    }
+
+    if (match) {
+      if (match.quantity <= 0) {
+        setMessage(`${match.name} en rupture de stock`);
+      } else {
+        addToCart(match);
+        setSearch(""); // clear so the next scan is ready
+      }
+    } else {
+      setMessage("Produit introuvable : " + query);
+    }
+  }
+
   function changeQty(productId: string, delta: number) {
     setCart((prev) =>
       prev
         .map((c) => {
           if (c.productId !== productId) return c;
           const newQty = c.qty + delta;
-          if (newQty > c.stock) return c; // not over stock
+          if (newQty > c.stock) return c;
           return { ...c, qty: newQty };
         })
         .filter((c) => c.qty > 0)
@@ -74,11 +110,19 @@ export default function Pos({ products }: { products: Product[] }) {
     setSaving(true);
     setMessage("");
     try {
+      let amountPaid: number | null = null;
+      if (customerId) {
+        if (payMode === "paid") amountPaid = total;
+        else if (payMode === "credit") amountPaid = 0;
+        else if (payMode === "partial") amountPaid = parseFloat(partialPaid) || 0;
+      }
+
       const saleId = await checkout(
-        cart.map((c) => ({ productId: c.productId, quantity: c.qty }))
+        cart.map((c) => ({ productId: c.productId, quantity: c.qty })),
+        customerId || null,
+        amountPaid
       );
       setCart([]);
-      // Go to the receipt page
       window.location.href = `/dashboard/sale/receipt/${saleId}`;
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Erreur");
@@ -87,7 +131,7 @@ export default function Pos({ products }: { products: Product[] }) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_460px] gap-4 max-w-full">
       {/* Left: products */}
       <div>
         <div className="flex items-center gap-2 border border-gray-300 rounded-md px-3 py-2 mb-3 bg-white">
@@ -96,30 +140,37 @@ export default function Pos({ products }: { products: Product[] }) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un produit..."
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleScan();
+              }
+            }}
+            autoFocus
+            placeholder="Rechercher ou scanner un code-barres..."
             className="flex-1 outline-none text-sm bg-transparent"
           />
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
           {filtered.map((p) => (
             <button
               key={p.id}
               onClick={() => addToCart(p)}
               disabled={p.quantity <= 0}
-              className="text-left border border-gray-200 rounded-lg p-2.5 bg-white hover:border-brand transition-colors disabled:opacity-40"
+              className="text-left border border-gray-200 rounded-lg p-1.5 bg-white hover:border-brand transition-colors disabled:opacity-40"
             >
-              <div className="h-14 bg-gray-50 rounded-md flex items-center justify-center mb-2 overflow-hidden">
+              <div className="aspect-square bg-gray-50 rounded-md flex items-center justify-center mb-1.5 overflow-hidden">
                 {p.imageUrl ? (
                   <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
                 ) : (
-                  <ImageIcon size={20} className="text-gray-300" />
+                  <ImageIcon size={18} className="text-gray-300" />
                 )}
               </div>
-              <p className="text-sm font-medium text-gray-800 truncate">{p.name}</p>
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-sm text-brand">{p.price.toFixed(2)}</span>
-                <span className="text-xs text-gray-400">stock {p.quantity}</span>
+              <p className="text-xs font-medium text-gray-800 truncate">{p.name}</p>
+              <div className="flex justify-between items-center mt-0.5">
+                <span className="text-xs text-brand font-medium">{p.price.toFixed(2)}</span>
+                <span className="text-[10px] text-gray-400">stk {p.quantity}</span>
               </div>
             </button>
           ))}
@@ -131,6 +182,91 @@ export default function Pos({ products }: { products: Product[] }) {
         <p className="flex items-center gap-2 font-medium text-gray-800 mb-3">
           <ShoppingCart size={18} /> Panier
         </p>
+
+        {/* Customer picker */}
+        <div className="mb-3">
+          <label className="text-xs text-gray-500">Client (optionnel)</label>
+          <select
+            value={customerId}
+            onChange={(e) => {
+              setCustomerId(e.target.value);
+              if (!e.target.value) setPayMode("paid");
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm mt-1 focus:outline-none focus:border-brand"
+          >
+            <option value="">Client de passage</option>
+            {customers.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Payment type */}
+        <div className="mb-3">
+          <label className="text-xs text-gray-500">Paiement</label>
+          <div className="flex gap-2 mt-1">
+            <button
+              type="button"
+              onClick={() => setPayMode("paid")}
+              className={`flex-1 py-1.5 rounded-md text-xs border transition-colors ${
+                payMode === "paid"
+                  ? "bg-green-50 text-green-700 border-green-300"
+                  : "border-gray-300 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              Payé
+            </button>
+            <button
+              type="button"
+              onClick={() => setPayMode("partial")}
+              disabled={!customerId}
+              className={`flex-1 py-1.5 rounded-md text-xs border transition-colors disabled:opacity-40 ${
+                payMode === "partial"
+                  ? "bg-blue-50 text-blue-700 border-blue-300"
+                  : "border-gray-300 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              Partiel
+            </button>
+            <button
+              type="button"
+              onClick={() => setPayMode("credit")}
+              disabled={!customerId}
+              className={`flex-1 py-1.5 rounded-md text-xs border transition-colors disabled:opacity-40 ${
+                payMode === "credit"
+                  ? "bg-orange-50 text-orange-700 border-orange-300"
+                  : "border-gray-300 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              Crédit
+            </button>
+          </div>
+
+          {payMode === "partial" && (
+            <div className="mt-2">
+              <input
+                type="number"
+                value={partialPaid}
+                onChange={(e) => setPartialPaid(e.target.value)}
+                placeholder="Montant payé maintenant"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-brand"
+              />
+              {partialPaid !== "" && (
+                <p className="text-xs text-orange-600 mt-1">
+                  Reste à crédit : {(total - (parseFloat(partialPaid) || 0)).toFixed(2)} MAD
+                </p>
+              )}
+            </div>
+          )}
+
+          {!customerId && (
+            <p className="text-xs text-gray-400 mt-1">
+              Choisissez un client pour vendre à crédit ou en partiel.
+            </p>
+          )}
+        </div>
 
         {cart.length === 0 ? (
           <p className="text-gray-400 text-sm">Cliquez sur un produit pour l&apos;ajouter.</p>
@@ -200,7 +336,13 @@ export default function Pos({ products }: { products: Product[] }) {
           disabled={saving || cart.length === 0}
           className="w-full py-3 rounded-md bg-brand text-white font-medium hover:bg-brand-dark transition-colors disabled:opacity-50"
         >
-          {saving ? "..." : "Encaisser"}
+          {saving
+            ? "..."
+            : payMode === "credit"
+            ? "Enregistrer à crédit"
+            : payMode === "partial"
+            ? "Enregistrer (partiel)"
+            : "Encaisser"}
         </button>
       </div>
     </div>

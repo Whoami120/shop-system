@@ -3,10 +3,10 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import bcrypt from "bcryptjs";
 
 // ====== CHANGE THESE 4 VALUES ======
-const SHOP_NAME = "Ma boutique";
+const SHOP_NAME = "Owner HQ";
 const ADMIN_NAME = "Khalid";
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin";
+const ADMIN_USERNAME = "owner";
+const ADMIN_PASSWORD = "owner";
 // ===================================
 
 const connectionString = process.env.DATABASE_URL!;
@@ -38,7 +38,7 @@ async function main() {
       name: ADMIN_NAME,
       username: ADMIN_USERNAME,
       password: hashedPassword,
-      role: "ADMIN",
+      role: "SUPERADMIN",
       shopId: shop.id,
     },
   });

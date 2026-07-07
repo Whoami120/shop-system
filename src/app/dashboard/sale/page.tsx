@@ -11,6 +11,11 @@ export default async function SalePage() {
     orderBy: { name: "asc" },
   });
 
+  const customers = await prisma.customer.findMany({
+    where: { shopId: user.shopId },
+    orderBy: { name: "asc" },
+  });
+
   return (
     <div className="p-6">
       <PageHeader
@@ -26,6 +31,7 @@ export default async function SalePage() {
           imageUrl: p.imageUrl,
           barcode: p.barcode,
         }))}
+        customers={customers.map((c) => ({ id: c.id, name: c.name }))}
       />
     </div>
   );
