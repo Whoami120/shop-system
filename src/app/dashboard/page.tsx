@@ -2,7 +2,7 @@ import { syncUser } from "@/lib/syncUser";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Wallet, Receipt, Box, TrendingUp, ShoppingCart, Plus, Truck, AlertTriangle } from "lucide-react";
+import { Wallet, Receipt, Box, TrendingUp, ShoppingCart, Plus, Truck, AlertTriangle, BarChart3 } from "lucide-react";
 
 function StatCard({
   icon,
@@ -27,7 +27,6 @@ export default async function DashboardPage() {
   if (!user) {
     redirect("/login");
   }
-  // Dashboard overview is for admins only
   if (user.role === "CASHIER") {
     redirect("/dashboard/sale");
   }
@@ -59,6 +58,32 @@ export default async function DashboardPage() {
 
   const lowStock = products.filter((p) => p.quantity <= p.lowStockLevel);
 
+  // ---- 7-day sales trend ----
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+
+  const recentSales = await prisma.sale.findMany({
+    where: { shopId, refunded: false, createdAt: { gte: sevenDaysAgo } },
+  });
+
+  // Build a slot for each of the last 7 days
+  const days: { label: string; total: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push({
+      label: d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric" }),
+      total: 0,
+    });
+  }
+  for (const s of recentSales) {
+    const label = s.createdAt.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric" });
+    const slot = days.find((d) => d.label === label);
+    if (slot) slot.total += s.total;
+  }
+  const maxDay = Math.max(1, ...days.map((d) => d.total));
+
   const today = new Date().toLocaleDateString("fr-FR", {
     weekday: "long",
     day: "numeric",
@@ -76,7 +101,6 @@ export default async function DashboardPage() {
     <div className="p-6">
       {/* Hero banner */}
       <div className="relative rounded-2xl overflow-hidden mb-6 h-48">
-        {/* Background: image if set, else brand color */}
         {user.shop.imageUrl ? (
           <img
             src={user.shop.imageUrl}
@@ -86,10 +110,7 @@ export default async function DashboardPage() {
         ) : (
           <div className="absolute inset-0 bg-brand-dark" />
         )}
-        {/* Dark overlay so text is readable */}
         <div className="absolute inset-0 bg-black/40" />
-
-        {/* Welcome panel */}
         <div className="relative h-full flex items-end p-5">
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center text-brand font-bold text-xl">
@@ -130,9 +151,28 @@ export default async function DashboardPage() {
         />
       </div>
 
+      {/* 7-day sales trend */}
+      <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 size={18} className="text-brand" />
+          <p className="font-medium text-gray-800">Ventes des 7 derniers jours</p>
+        </div>
+        <div className="flex items-end justify-between gap-2 h-40">
+          {days.map((d, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+              <span className="text-[10px] text-gray-500 mb-1">{d.total > 0 ? d.total.toFixed(0) : ""}</span>
+              <div
+                className="w-full bg-brand rounded-t-md transition-all"
+                style={{ height: `${(d.total / maxDay) * 100}%`, minHeight: d.total > 0 ? "4px" : "0" }}
+              />
+              <span className="text-[10px] text-gray-400 mt-1 text-center">{d.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Shortcuts + low stock */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Shortcuts */}
         <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
           <p className="font-medium text-gray-800 mb-3">Raccourcis</p>
           <div className="flex gap-3 flex-wrap">
@@ -157,7 +197,6 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Low stock */}
         <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle size={18} className="text-orange-500" />

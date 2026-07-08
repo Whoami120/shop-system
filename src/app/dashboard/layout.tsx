@@ -3,7 +3,7 @@ import { getShopModules } from "@/lib/getShopModules";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Sidebar from "./Sidebar";
-import { LayoutDashboard, Boxes, ShoppingCart, Truck, Settings } from "lucide-react";
+import { LayoutDashboard, Boxes, ShoppingCart, Truck, Settings, BarChart3 } from "lucide-react";
 
 function roleLabel(role: string) {
   if (role === "ADMIN") return "Admin";
@@ -45,7 +45,10 @@ export default async function DashboardLayout({
       key: "dashboard",
       label: "Tableau de bord",
       icon: <LayoutDashboard size={18} />,
-      items: [{ href: "/dashboard", label: "Tableau de bord" }],
+      items: [
+        { href: "/dashboard", label: "Tableau de bord" },
+        { href: "/dashboard/expenses", label: "Dépenses" },
+      ],
     });
   }
 
@@ -73,6 +76,23 @@ export default async function DashboardLayout({
     if (items.length > 0) {
       groups.push({ key: "sales", label: "Ventes", icon: <ShoppingCart size={18} />, items });
     }
+  }
+
+  if ((enabledModules.includes("sales") || enabledModules.includes("inventory")) && role === "ADMIN") {
+    const items = [];
+    if (enabledModules.includes("sales")) {
+      items.push({ href: "/dashboard/reports/sales", label: "Rapport des ventes" });
+    }
+    if (enabledModules.includes("inventory")) {
+      items.push({ href: "/dashboard/reports/stock", label: "Rapport de stock" });
+    }
+    items.push({ href: "/dashboard/reports/profit", label: "Rapport de bénéfice" });
+    groups.push({
+      key: "reports",
+      label: "Rapports",
+      icon: <BarChart3 size={18} />,
+      items,
+    });
   }
 
   if (enabledModules.includes("purchases")) {

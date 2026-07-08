@@ -26,6 +26,7 @@ model Shop {
   categories  Category[]
   brands      Brand[]
   customers   Customer[]
+  expenses    Expense[]
 }
 
 enum Role {
@@ -263,5 +264,20 @@ model CustomerTransaction {
   customerId String
 
   shopId String
+  userId String
+}
+
+// ---------- EXPENSE ----------
+model Expense {
+  id          String   @id @default(cuid())
+  label       String
+  category    String
+  amount      Float
+  note        String?
+  createdAt   DateTime @default(now())
+
+  shop   Shop   @relation(fields: [shopId], references: [id])
+  shopId String
+
   userId String
 }
